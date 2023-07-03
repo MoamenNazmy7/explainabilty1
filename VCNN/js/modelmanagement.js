@@ -602,9 +602,15 @@ async function trainModel(model, X_train, y_train, X_test, y_test, epochs = 50, 
 
     async function displayLayersOutputs(model, i, input) {
         if (i >= model.layers.length - 1) {
-            return;//Do not draw the final output
+            return;  // Do not draw the final output
         }
         let layer = model.layers[i];
+
+        // TODO case input layer is not needed? - for drawing?!
+        if (layer.name.indexOf("lstm_input") >= 0){
+            return;  // the input layer has no apply function?!
+        }
+
         let ts = layer.apply(input);
         let timeStamp = layersConfig[i].timeStamp;
         if (layer.name.indexOf("lstm") >= 0) {
@@ -857,7 +863,9 @@ async function displayLayerWeights(model, i, containerId) {
     console.log(layer)
     console.log(layer.getWeights())
 
-    if (layer.name.indexOf("lstm") >= 0) {
+    if (layer.name.isPrototypeOf("input") >= 0){  // TODO one problem is that you handle the input layer as lstm and it had no weights
+        console.log("processing input layer")
+    } else if (layer.name.indexOf("lstm") >= 0) {
 
         let strokeWidthScale = d3.scaleLinear().domain([0, d3.max(layerTrainingWeight.map(d => d >= 0 ? d : -d))]).range([minStrokeWidth, maxStrokeWidth]);
         let opacityScale = d3.scaleLinear().domain(strokeWidthScale.domain()).range([minLineWeightOpacity, maxLineWeightOpacity]);
